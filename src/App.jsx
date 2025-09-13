@@ -20,7 +20,7 @@ import { searchGroups } from './components/searchGroups';
 import { StudyGroupCard } from './components/StudyGroupCard';
 import { AddGroupModal } from './components/AddGroupModal';
 import { NoGroupsFound } from './components/NoGroupsFound';
-import {addDoc, collection, onSnapshot} from "firebase/firestore"
+import {addDoc, collection, onSnapshot, getDoc} from "firebase/firestore"
 import {db} from "./firebase-config"
 
 
@@ -93,26 +93,6 @@ function App() {
     setNewGroup(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFollowGroup = async (groupId, followingUsers) => {
-    console.log(userEmail);
-    if (!userEmail || !groupId) return;
-    if (followingUsers && followingUsers.includes(userEmail)) return; // Already following
-    const groupRef = doc(db, "groups", groupId);
-    await updateDoc(groupRef, {
-      followingUsers: arrayUnion(userEmail)
-    });
-  };
-
-  // Unfollow a group: remove userEmail from group's followingUsers array
-  const handleUnfollowGroup = async (groupId, followingUsers) => {
-    if (!userEmail || !groupId) return;
-    if (!followingUsers || !followingUsers.includes(userEmail)) return; // Not following
-    const groupRef = doc(db, "groups", groupId);
-    await updateDoc(groupRef, {
-      followingUsers: arrayRemove(userEmail)
-    });
-  };
-
 
   // Add new group
   const handleAddGroup = async (e) => {
@@ -168,6 +148,45 @@ function App() {
     ...filteredGroups.filter(g => g.followingUsers && g.followingUsers.includes(userEmail)),
     ...filteredGroups.filter(g => !g.followingUsers || !g.followingUsers.includes(userEmail))
   ];
+
+
+  //handle following
+  const handleFollowGroup = async (groupId, followingUsers) => {
+    console.log(userEmail);
+    if (!userEmail || !groupId) return;
+    if (followingUsers && followingUsers.includes(userEmail)) return; // Already following
+    const groupRef = doc(db, "groups", groupId);
+    const docSnap = await getDoc(groupRef);
+    const data = docSnap.data();
+    const maxNumber = typeof data.maxNumber === 'number' ? data.maxNumber : 0;
+    if ((followingUsers?.length || 0) >= maxNumber) return; // Do not follow if at capacity
+    await updateDoc(groupRef, {
+      followingUsers: arrayUnion(userEmail)
+    });
+    // Re-fetch to get updated followingUsers
+    const updatedSnap = await getDoc(groupRef);
+    const updatedData = updatedSnap.data();
+    await updateDoc(groupRef, {
+      participants: (updatedData.followingUsers?.length || 0)
+    });
+  };
+
+  // Unfollow a group: remove userEmail from group's followingUsers array
+  const handleUnfollowGroup = async (groupId, followingUsers) => {
+    if (!userEmail || !groupId) return;
+    if (!followingUsers || !followingUsers.includes(userEmail)) return; // Not following
+    const groupRef = doc(db, "groups", groupId);
+    await updateDoc(groupRef, {
+      followingUsers: arrayRemove(userEmail)
+    });
+    // Re-fetch to get updated followingUsers
+    const updatedSnap = await getDoc(groupRef);
+    const updatedData = updatedSnap.data();
+    await updateDoc(groupRef, {
+      participants: (updatedData.followingUsers?.length || 0)
+    });
+  };
+
 
   // Track which groups the user has joined (by group id)
   // const [joinedGroups, setJoinedGroups] = useState([]);

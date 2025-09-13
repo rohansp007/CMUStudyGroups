@@ -58,11 +58,14 @@ export const StudyGroupCard = ({ group, handleFollowGroup, handleUnfollowGroup, 
       </div>
       {!isFollowed ? (
         <button
-          className={`w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 bg-blue-600 hover:bg-blue-700 text-white`}
-          onClick={() => handleFollowGroup(group.id, group.followingUsers)}
+          className={`w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 ${isFull ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+          disabled={isFull}
+          onClick={() => {
+            if (!isFull) handleFollowGroup(group.id, group.followingUsers);
+          }}
         >
           <Users className="w-4 h-4 mr-2" />
-          Follow Group
+          {isFull ? 'Capacity Full' : 'Follow Group'}
         </button>
       ) : (
         <button
