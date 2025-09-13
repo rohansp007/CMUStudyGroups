@@ -9,6 +9,9 @@ const UserProfileDropdown = ({ userData }) => (
   <div className="absolute left-[-40px] top-full mt-2 w-80 bg-white rounded-lg shadow-lg z-10 p-6 text-black">
     <div className="mb-2 font-bold text-lg">{userData?.displayName || 'Unknown User'}</div>
     <div className="mb-2 text-sm"><span className="font-semibold">Email:</span> {userData?.email || 'N/A'}</div>
+    <div className="mb-2 text-sm"><span className="font-semibold">Classes:</span> {userData?.classes?.length > 0 ? userData.classes.join(', ') : 'No classes'}</div>
+    <div className="mb-2 text-sm"><span className="font-semibold">Major:</span> {userData?.major || 'N/A'}</div>
+    <div className="mb-2 text-sm"><span className="font-semibold">Year:</span> {userData?.year || 'N/A'}</div>
     {/* Add more fields as needed from userData */}
   </div>
 );
@@ -51,6 +54,8 @@ const Header = ({ userEmail }) => {
             {userData?.displayName ? userData.displayName.split(' ').map(n => n[0]).join('') : 'U'}
           </div>
           <span className="text-white font-medium">{userData?.displayName || 'Unknown User'}</span>
+          
+          
           <ChevronDown className="w-4 h-4 text-gray-300" />
           {showDropdown && <UserProfileDropdown userData={userData} />}
         </div>
