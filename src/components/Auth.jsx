@@ -11,24 +11,23 @@ export const Auth = (props) => {
     const signInWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider );
         try {
-            setIsAuth(true);
-        
-            console.log(result);
             const user = result.user;
             const email = user.email;
             let atIndex = email.indexOf("@");
             let domain = email.substring(atIndex);
-            if (domain == "@andrew.cmu.edu") {
+            if (domain === "@andrew.cmu.edu") {
                 console.log("allowed domain");
+                cookies.set("auth-token", user.refreshToken);
+                setIsAuth(true);
             } else {
+                alert("Only CMU email addresses are allowed.");
                 console.log("not allowed domain");
+                // Do NOT set auth-token or setIsAuth
             }
             console.log(domain);
-            cookies.set("auth-token", user.refreshToken);
         } catch (err) {
             console.log(err);
         }
-
     };
 //need to find the css he already wrote (className)
     return (
