@@ -7,18 +7,24 @@ export const Auth = () => {
     
     const signInWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider );
-        console.log(result);
-        const user = result.user;
-        const email = user.email;
-        let atIndex = email.indexOf("@");
-        let domain = email.substring(atIndex);
-        if (domain == "@andrew.cmu.edu") {
-            console.log("allowed domain");
-        } else {
-            console.log("not allowed domain");
+        try {
+            
+        
+            console.log(result);
+            const user = result.user;
+            const email = user.email;
+            let atIndex = email.indexOf("@");
+            let domain = email.substring(atIndex);
+            if (domain == "@andrew.cmu.edu") {
+                console.log("allowed domain");
+            } else {
+                console.log("not allowed domain");
+            }
+            console.log(domain);
+            cookies.set("auth-token", user.refreshToken);
+        } catch (err) {
+            console.log(err);
         }
-        console.log(domain);
-        cookies.set("auth-token", user.refreshToken);
 
     };
 //need to find the css he already wrote (className)
