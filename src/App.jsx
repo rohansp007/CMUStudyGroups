@@ -8,11 +8,11 @@ import ResultsCount from './components/ResultsCount';
 import StudyGroupsGrid from './components/StudyGroupsGrid';
 import { filterGroups } from './components/filterGroups';
 import { searchGroups } from './components/searchGroups';
-import { createGroup } from './components/createGroup';
+//import { createGroup } from './components/createGroup';
 import { StudyGroupCard } from './components/StudyGroupCard';
 import { AddGroupModal } from './components/AddGroupModal';
 import { NoGroupsFound } from './components/NoGroupsFound';
-import {addDoc, collection, updateDoc, doc, getDocs} from "firebase/firestore"
+import {addDoc, collection, updateDoc, doc, onSnapshot} from "firebase/firestore"
 import {db} from "./firebase-config"
 
 
@@ -27,15 +27,18 @@ function App() {
 
   // Fetch groups from Firebase on mount
   useEffect(() => {
-    const fetchGroups = async () => {
-      const snapshot = await getDocs(groupRef);
+    // Real-time listener for study groups
+    const unsubscribe = onSnapshot(groupRef, (snapshot) => {
       const groups = snapshot.docs.map(docSnap => ({
         ...docSnap.data(),
         id: docSnap.id
       }));
       setStudyGroups(groups);
+    });
+    return () => {
+      console.log("Unsubscribing function was called");
+      unsubscribe()
     };
-    fetchGroups();
   }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
@@ -109,8 +112,7 @@ function App() {
         maxNumber: Number(newGroup.maxNumber),
         participants: 0 // Always include participants field
       };
-      const docRef = await addDoc(groupRef, groupToAdd);
-      setStudyGroups(prev => [...prev, { ...groupToAdd, id: docRef.id }]);
+      await addDoc(groupRef, groupToAdd);
       setShowModal(false);
       setNewGroup({
         name: '',
