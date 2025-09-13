@@ -1,11 +1,10 @@
 import {auth, provider} from "../firebase-config.js";
 import { signInWithPopup} from 'firebase/auth';
-//import {useCookies} from "react-cookie";
-//to add-- cookies
+import Cookies from "universal-cookie";
 
-//const cookies = new Cookies();
+const cookies = new Cookies();
 export const Auth = () => {
-    //const [cookies, setCookie, removeCookie] = useCookies(["user"])
+    
     const signInWithGoogle = async () => {
         const result = await signInWithPopup(auth, provider );
         console.log(result);
@@ -19,8 +18,7 @@ export const Auth = () => {
             console.log("not allowed domain");
         }
         console.log(domain);
-        //setCookie("auth-token", result.user.refreshToken, {path: "/"});
-
+        cookies.set("auth-token", user.refreshToken);
 
     };
 //need to find the css he already wrote (className)
