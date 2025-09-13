@@ -4,8 +4,10 @@ import {auth, db} from "../firebase-config"
 
 export const Chat = (props) => {
     const {room} = props
+    //input variable to be sent to db
     const [newMessage, setNewMessage] = useState("");
 
+    //reference to the collection in the db
     const messagesRef = collection(db, "messages");
 
     const handleSubmit = async (e) => {
