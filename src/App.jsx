@@ -12,6 +12,9 @@ import { createGroup } from './components/createGroup';
 import { StudyGroupCard } from './components/StudyGroupCard';
 import { AddGroupModal } from './components/AddGroupModal';
 import { NoGroupsFound } from './components/NoGroupsFound';
+import {addDoc, collection} from "firebase/firestore"
+import {db} from "./firebase-config"
+
 
 const cookies = new Cookies();
 
@@ -73,7 +76,13 @@ function App() {
       // the answer is so right here but idk this syntax
       setStudyGroups(prev => createGroup(prev, groupToAdd));
       await addDoc(groupRef, {
-        //blahlblah
+        name: newGroup.name,
+        organizer: newGroup.organizer,
+        class: newGroup.class,
+        maxNumber: newGroup.maxNumber,
+        location: newGroup.location,
+        startTime: newGroup.startTime,
+        endTime: newGroup.endTime
       })
       //reset modal
       setShowModal(false);
