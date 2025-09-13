@@ -36,7 +36,8 @@ export const Auth = (props) => {
                     await addDoc(collection(db, "users"), {
                         email: user.email,
                         displayName: user.displayName,
-                        followedGroups: []
+                        followedGroups: [],
+                        classes: []
                     });
                 } else {
                     console.log("User already exists in the database.");
