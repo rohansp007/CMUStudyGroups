@@ -171,7 +171,6 @@ function App() {
     console.log("Not authenticated");
     return (
       <div>
-        Hello woklllrd
         <Auth setIsAuth={setIsAuth} />
       </div>
     );
