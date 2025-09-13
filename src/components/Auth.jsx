@@ -1,10 +1,13 @@
-import {auth, provider} from "../firebase-config.js";
+import {auth, provider, db} from "../firebase-config.js";
 import { signInWithPopup} from 'firebase/auth';
 import Cookies from "universal-cookie";
 import React from 'react';
 import { BookOpen, Users, Brain, Sparkles } from 'lucide-react';
+import { collection, addDoc } from "firebase/firestore";
 
 const cookies = new Cookies();
+const expireInMinutes = 30; // Set expiration time in minutes
+const expires = new Date(Date.now() + expireInMinutes * 60 * 1000); // 30 minutes from now
 export const Auth = (props) => {
     const { setIsAuth } = props
     
@@ -17,7 +20,11 @@ export const Auth = (props) => {
             let domain = email.substring(atIndex);
             if (domain === "@andrew.cmu.edu") {
                 console.log("allowed domain");
-                cookies.set("auth-token", user.refreshToken);
+                cookies.set("auth-token", user.refreshToken, { expires });
+                await addDoc(collection(db, "users"), {
+                    email: user.email,
+                    displayName: user.displayName
+                });
                 setIsAuth(true);
             } else {
                 alert("Only CMU email addresses are allowed.");
