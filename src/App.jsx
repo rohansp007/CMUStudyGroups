@@ -35,6 +35,9 @@ function App() {
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
+
+  //OOOOOOOOOOOOOOOOOOO
+  const groupRef = collection(db, "groups");
   const [newGroup, setNewGroup] = useState({
     name: '',
     organizer: '',
@@ -52,7 +55,7 @@ function App() {
   };
 
   // Add new group
-  const handleAddGroup = (e) => {
+  const handleAddGroup = async (e) => {
     e.preventDefault();
     if (
       //all this shit exists
@@ -65,8 +68,14 @@ function App() {
       newGroup.endTime
     ) {
       let groupToAdd = { ...newGroup, participants: 0 };
+      //wtf did you write claude what 
       groupToAdd.maxNumber = Number(groupToAdd.maxNumber);
+      // the answer is so right here but idk this syntax
       setStudyGroups(prev => createGroup(prev, groupToAdd));
+      await addDoc(groupRef, {
+        //blahlblah
+      })
+      //reset modal
       setShowModal(false);
       setNewGroup({ name: '', organizer: '', class: '', maxNumber: '', location: '', startTime: '', endTime: '' });
     }
