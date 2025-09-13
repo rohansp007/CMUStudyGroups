@@ -8,6 +8,8 @@ import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 const cookies = new Cookies();
 const expireInMinutes = 30; // Set expiration time in minutes
 const expires = new Date(Date.now() + expireInMinutes * 60 * 1000); // 30 minutes from now
+
+export let userEmail = null;
 export const Auth = (props) => {
     const { setIsAuth } = props
     
@@ -22,10 +24,13 @@ export const Auth = (props) => {
             if (domain === "@andrew.cmu.edu") {
                 console.log("allowed domain");
                 cookies.set("auth-token", user.refreshToken, { expires });
+                cookies.set("user-email", user.email, {expires});
+                console.log(user.email);
 
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", user.email));
                 const querySnapshot = await getDocs(q);
+                userEmail = email;
 
                 if (querySnapshot.empty) {
                     //there is a case where the code is updated 
@@ -36,8 +41,9 @@ export const Auth = (props) => {
                     await addDoc(collection(db, "users"), {
                         email: user.email,
                         displayName: user.displayName,
-                        followedGroups: [],
+                        //followedGroups: [],
                         classes: []
+                        
                     });
                 } else {
                     console.log("User already exists in the database.");
