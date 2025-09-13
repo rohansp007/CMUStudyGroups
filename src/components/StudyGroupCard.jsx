@@ -10,8 +10,11 @@ function formatTime12hr(time) {
   return `${hour}:${minute} ${ampm}`;
 }
 
-export const StudyGroupCard = ({ group, index, handleJoinGroup }) => {
-  const isFull = group.participants >= group.maxNumber;
+export const StudyGroupCard = ({ group, index, handleJoinGroup, handleLeaveGroup, joined }) => {
+  const participants = typeof group.participants === 'number' ? group.participants : 0;
+  const maxNumber = typeof group.maxNumber === 'number' ? group.maxNumber : 0;
+  const isFull = participants >= maxNumber;
+  const isJoined = joined;
   return (
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 flex flex-col h-full">
       <div className="flex-grow">
@@ -32,7 +35,7 @@ export const StudyGroupCard = ({ group, index, handleJoinGroup }) => {
           </div>
           <div className="flex items-center text-gray-300">
             <Users className="w-4 h-4 mr-3 text-green-400" />
-            <span className="text-sm">{`${group.participants} out of ${group.maxNumber} participants`}</span>
+            <span className="text-sm">{`${participants} out of ${maxNumber} participants`}</span>
           </div>
           <div className="flex items-center text-gray-300">
             <MapPin className="w-4 h-4 mr-3 text-red-400" />
@@ -46,14 +49,25 @@ export const StudyGroupCard = ({ group, index, handleJoinGroup }) => {
           )}
         </div>
       </div>
-      <button
-        className={`w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 ${isFull ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-        disabled={isFull}
-        onClick={() => handleJoinGroup(index)}
-      >
-        <Users className="w-4 h-4 mr-2" />
-        {isFull ? 'Capacity Full' : 'JOIN GROUP'}
-      </button>
+      {!isJoined && (
+        <button
+          className={`w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 ${isFull ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+          disabled={isFull}
+          onClick={() => handleJoinGroup(index)}
+        >
+          <Users className="w-4 h-4 mr-2" />
+          {isFull ? 'Capacity Full' : 'JOIN GROUP'}
+        </button>
+      )}
+      {isJoined && (
+        <button
+          className="w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 bg-red-600 hover:bg-red-700 text-white"
+          onClick={() => handleLeaveGroup(index)}
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Leave Group
+        </button>
+      )}
     </div>
   );
 };

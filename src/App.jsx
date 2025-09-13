@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { Auth } from './components/Auth';
 import Cookies from 'universal-cookie';
@@ -12,7 +12,7 @@ import { createGroup } from './components/createGroup';
 import { StudyGroupCard } from './components/StudyGroupCard';
 import { AddGroupModal } from './components/AddGroupModal';
 import { NoGroupsFound } from './components/NoGroupsFound';
-import {addDoc, collection} from "firebase/firestore"
+import {addDoc, collection, updateDoc, doc, getDocs} from "firebase/firestore"
 import {db} from "./firebase-config"
 
 
@@ -24,6 +24,19 @@ function App() {
 
   // Study groups state
   const [studyGroups, setStudyGroups] = useState([]);
+
+  // Fetch groups from Firebase on mount
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const snapshot = await getDocs(groupRef);
+      const groups = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      }));
+      setStudyGroups(groups);
+    };
+    fetchGroups();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
 
@@ -61,7 +74,6 @@ function App() {
   const handleAddGroup = async (e) => {
     e.preventDefault();
     if (
-      //all this shit exists
       newGroup.name &&
       newGroup.organizer &&
       newGroup.class &&
@@ -70,34 +82,51 @@ function App() {
       newGroup.startTime &&
       newGroup.endTime
     ) {
-      let groupToAdd = { ...newGroup, participants: 0 };
-      //wtf did you write claude what 
-      groupToAdd.maxNumber = Number(groupToAdd.maxNumber);
-      // the answer is so right here but idk this syntax
-      setStudyGroups(prev => createGroup(prev, groupToAdd));
-      await addDoc(groupRef, {
-        name: newGroup.name,
-        organizer: newGroup.organizer,
-        class: newGroup.class,
-        maxNumber: newGroup.maxNumber,
-        location: newGroup.location,
-        startTime: newGroup.startTime,
-        endTime: newGroup.endTime
-      })
-      //reset modal
+      let groupToAdd = {
+        ...newGroup,
+        maxNumber: Number(newGroup.maxNumber),
+        participants: 0 // Always include participants field
+      };
+      const docRef = await addDoc(groupRef, groupToAdd);
+      setStudyGroups(prev => [...prev, { ...groupToAdd, id: docRef.id }]);
       setShowModal(false);
       setNewGroup({ name: '', organizer: '', class: '', maxNumber: '', location: '', startTime: '', endTime: '' });
     }
   };
 
+  // Track which groups the user has joined (by group id)
+  const [joinedGroups, setJoinedGroups] = useState([]);
+
   // Handle join group
-  const handleJoinGroup = (index) => {
-    setStudyGroups(prev => prev.map((group, i) => {
-      if (i === index && group.participants < group.maxNumber) {
-        return { ...group, participants: group.participants + 1 };
-      }
-      return group;
-    }));
+  const handleJoinGroup = async (index) => {
+    const group = filteredGroups[index];
+    if (!group || !group.id) return;
+    if (joinedGroups.includes(group.id)) return;
+    const currentParticipants = typeof group.participants === 'number' ? group.participants : 0;
+    if (currentParticipants < group.maxNumber) {
+      const groupDocRef = doc(db, "groups", group.id);
+      await updateDoc(groupDocRef, {
+        participants: currentParticipants + 1
+      });
+      setStudyGroups(prev => prev.map(g => g.id === group.id ? { ...g, participants: currentParticipants + 1 } : g));
+      setJoinedGroups(prev => [...prev, group.id]);
+    }
+  };
+
+  // Handle leave group
+  const handleLeaveGroup = async (index) => {
+    const group = filteredGroups[index];
+    if (!group || !group.id) return;
+    if (!joinedGroups.includes(group.id)) return;
+    const currentParticipants = typeof group.participants === 'number' ? group.participants : 0;
+    if (currentParticipants > 0) {
+      const groupDocRef = doc(db, "groups", group.id);
+      await updateDoc(groupDocRef, {
+        participants: currentParticipants - 1
+      });
+      setStudyGroups(prev => prev.map(g => g.id === group.id ? { ...g, participants: currentParticipants - 1 } : g));
+      setJoinedGroups(prev => prev.filter(id => id !== group.id));
+    }
   };
 
   if (!isAuth) {
@@ -131,7 +160,7 @@ function App() {
           onAddGroupClick={() => setShowModal(true)}
         />
         <ResultsCount count={filteredGroups.length} />
-        <StudyGroupsGrid groups={filteredGroups} handleJoinGroup={handleJoinGroup} />
+  <StudyGroupsGrid groups={filteredGroups} handleJoinGroup={handleJoinGroup} handleLeaveGroup={handleLeaveGroup} joinedGroups={joinedGroups} />
       </div>
     </div>
   );
