@@ -1,10 +1,13 @@
-import {auth, provider} from "../firebase-config.js";
+import {auth, provider, db} from "../firebase-config.js";
 import { signInWithPopup} from 'firebase/auth';
 import Cookies from "universal-cookie";
 import React from 'react';
 import { BookOpen, Users, Brain, Sparkles } from 'lucide-react';
+import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 
 const cookies = new Cookies();
+const expireInMinutes = 30; // Set expiration time in minutes
+const expires = new Date(Date.now() + expireInMinutes * 60 * 1000); // 30 minutes from now
 export const Auth = (props) => {
     const { setIsAuth } = props
     
@@ -15,9 +18,31 @@ export const Auth = (props) => {
             const email = user.email;
             let atIndex = email.indexOf("@");
             let domain = email.substring(atIndex);
+
             if (domain === "@andrew.cmu.edu") {
                 console.log("allowed domain");
-                cookies.set("auth-token", user.refreshToken);
+                cookies.set("auth-token", user.refreshToken, { expires });
+
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", user.email));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    //there is a case where the code is updated 
+                    //but the user already exists in the db
+                    // so the new field wont exist for old users since the code only 
+                    // checks if user exists before adding
+                    // just clear the db for now on new updates
+                    await addDoc(collection(db, "users"), {
+                        email: user.email,
+                        displayName: user.displayName,
+                        followedGroups: [],
+                        classes: []
+                    });
+                } else {
+                    console.log("User already exists in the database.");
+                };
+
                 setIsAuth(true);
             } else {
                 alert("Only CMU email addresses are allowed.");
