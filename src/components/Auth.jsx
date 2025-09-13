@@ -28,14 +28,20 @@ export const Auth = (props) => {
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
+                    //there is a case where the code is updated 
+                    //but the user already exists in the db
+                    // so the new field wont exist for old users since the code only 
+                    // checks if user exists before adding
+                    // just clear the db for now on new updates
                     await addDoc(collection(db, "users"), {
                         email: user.email,
-                        displayName: user.displayName
+                        displayName: user.displayName,
+                        followedGroups: []
                     });
                 } else {
                     console.log("User already exists in the database.");
                 };
-                
+
                 setIsAuth(true);
             } else {
                 alert("Only CMU email addresses are allowed.");
