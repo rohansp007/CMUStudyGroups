@@ -4,6 +4,7 @@ import React, {useState, useRef } from 'react'
 import './App.css'
 import {Auth} from "./components/Auth"
 import Cookies from "universal-cookie";
+import {Chat} from "./components/Chat"
 
 
 
@@ -33,11 +34,15 @@ function App() {
     
     //the first segment of dir is the homepage we will use,
     //the chatroom segment will be for continuing the tutorial
+    //going to hit a merge conflict
     <div> 
       
+      
       Home page???
+      
       {room ? ( 
-        <div>Chat</div>
+        <Chat room = {room}/>
+        
       ) : (
         <div className="room"> 
           <label> Enter Room Name:</label>
