@@ -1,4 +1,4 @@
-import React, {useState } from 'react'
+import React, {useState, useRef } from 'react'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import './App.css'
@@ -13,8 +13,9 @@ function App() {
   //const [count, setCount] = useState(0)
   const [isAuth, setIsAuth] = useState(cookies.get("auth-token"))
   const [room, setRoom] = useState(null)
-  console.log(setIsAuth)
-  console.log(setRoom)
+ 
+
+  const roomInputRef = useRef(null);
   
   if (!isAuth ) {
     console.log("not authenticated")
@@ -22,7 +23,7 @@ function App() {
     return (
       <div>
         Hello woklllrd
-        <Auth />
+        <Auth setIsAuth={setIsAuth}/>
       </div>
     );
   }
@@ -40,12 +41,14 @@ function App() {
       ) : (
         <div className="room"> 
           <label> Enter Room Name:</label>
-          <input/>
-          <button> Enter Chat</button>
+          <input ref={roomInputRef}/>
+          <button onClick ={() => setRoom(roomInputRef.current.value)}> 
+            Enter Chat
+          </button>
 
         </div>
       )
-             }
+      }
     </div>
   )
 
