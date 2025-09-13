@@ -26,6 +26,7 @@ export const Auth = (props) => {
                 cookies.set("auth-token", user.refreshToken, { expires });
                 cookies.set("user-email", user.email, {expires});
                 console.log(user.email);
+                
 
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("email", "==", user.email));
@@ -38,13 +39,18 @@ export const Auth = (props) => {
                     // so the new field wont exist for old users since the code only 
                     // checks if user exists before adding
                     // just clear the db for now on new updates
+                    
+
                     await addDoc(collection(db, "users"), {
                         email: user.email,
                         displayName: user.displayName,
-                        //followedGroups: [],
-                        classes: []
-                        
+                        classes: [],
+                        major: "",
+                        year: ""
+
                     });
+
+                    cookies.set("user-object", JSON.stringify(user), {expires});
                 } else {
                     console.log("User already exists in the database.");
                 };

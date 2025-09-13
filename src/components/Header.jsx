@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Mail } from 'lucide-react';
+import { db } from '../firebase-config';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 
-// Dummy UserProfileDropdown component
-const UserProfileDropdown = () => (
+// UserProfileDropdown component using userData
+const UserProfileDropdown = ({ userData }) => (
   <div className="absolute left-[-40px] top-full mt-2 w-80 bg-white rounded-lg shadow-lg z-10 p-6 text-black">
-    <div className="mb-2 font-bold text-lg">Alex Johnson</div>
-    <div className="mb-2 text-sm"><span className="font-semibold">Year:</span> Junior</div>
-    <div className="mb-2 text-sm"><span className="font-semibold">Major:</span> Computer Science</div>
-    <div className="mb-2 text-sm"><span className="font-semibold">Classes Taken:</span> CS 15-122, CS 15-213, MATH 21-127</div>
-    <div className="mb-2 text-sm flex items-center"><Mail className="w-4 h-4 mr-2 text-gray-700" /> alex.johnson@gmail.com</div>
+    <div className="mb-2 font-bold text-lg">{userData?.displayName || 'Unknown User'}</div>
+    <div className="mb-2 text-sm"><span className="font-semibold">Email:</span> {userData?.email || 'N/A'}</div>
+    {/* Add more fields as needed from userData */}
   </div>
 );
 
@@ -17,8 +17,23 @@ const UserProfileDropdown = () => (
 const handleMouseEnter = () => {};
 const handleMouseLeave = () => {};
 
-const Header = () => {
+
+const Header = ({ userEmail }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      if (!userEmail) return;
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', userEmail));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        setUserData(snapshot.docs[0].data());
+      }
+    }
+    fetchUser();
+  }, [userEmail]);
 
   return (
     <header className="w-full bg-gradient-to-r from-blue-900 to-purple-900 py-6 px-6 flex items-center justify-between">
@@ -33,11 +48,11 @@ const Header = () => {
           onMouseLeave={() => setShowDropdown(false)}
         >
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-            AJ
+            {userData?.displayName ? userData.displayName.split(' ').map(n => n[0]).join('') : 'U'}
           </div>
-          <span className="text-white font-medium">Alex Johnson</span>
+          <span className="text-white font-medium">{userData?.displayName || 'Unknown User'}</span>
           <ChevronDown className="w-4 h-4 text-gray-300" />
-          {showDropdown && <UserProfileDropdown />}
+          {showDropdown && <UserProfileDropdown userData={userData} />}
         </div>
       </div>
     </header>

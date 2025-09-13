@@ -216,7 +216,7 @@ function App() {
   return (
     console.log("Authenticated"),
     <div className="min-h-screen w-screen bg-gray-900 text-white flex flex-col m-0 p-0">
-      <Header />
+      <Header userEmail={userEmail}/>
       <AddGroupModal
         show={showModal}
         onClose={() => setShowModal(false)}
