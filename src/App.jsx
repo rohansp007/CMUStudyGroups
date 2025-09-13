@@ -39,15 +39,20 @@ function App() {
   }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
 
-  // Get unique classes for filter dropdown
+  // Get unique classes and locations for filter dropdowns
   const uniqueClasses = [...new Set(studyGroups.map(group => group.class))];
+  const uniqueLocations = [...new Set(studyGroups.map(group => group.location))];
 
-  // Filter study groups based on search and class filter
-  const filteredGroups = filterGroups(
+  // Filter study groups based on search, class, and location filter
+  let filteredGroups = filterGroups(
     searchGroups(studyGroups, searchTerm),
     classFilter
   );
+  if (locationFilter) {
+    filteredGroups = filteredGroups.filter(group => group.location === locationFilter);
+  }
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -60,8 +65,14 @@ function App() {
     class: '',
     maxNumber: '',
     location: '',
-    startTime: '',
-    endTime: ''
+    startDate: '',
+    startHour: '1',
+    startMinute: '00',
+    startAMPM: 'AM',
+    endDate: '',
+    endHour: '1',
+    endMinute: '00',
+    endAMPM: 'AM'
   });
 
   // Handle form input
@@ -79,18 +90,43 @@ function App() {
       newGroup.class &&
       newGroup.maxNumber &&
       newGroup.location &&
-      newGroup.startTime &&
-      newGroup.endTime
+      newGroup.startDate &&
+      newGroup.startHour &&
+      newGroup.startMinute &&
+      newGroup.startAMPM &&
+      newGroup.endDate &&
+      newGroup.endHour &&
+      newGroup.endMinute &&
+      newGroup.endAMPM
     ) {
+      // Compose start and end datetime strings
+        const startDateTime = `${newGroup.startDate} @ ${newGroup.startHour.padStart(2, '0')}:${newGroup.startMinute} ${newGroup.startAMPM}`;
+        const endDateTime = `${newGroup.endDate} @ ${newGroup.endHour.padStart(2, '0')}:${newGroup.endMinute} ${newGroup.endAMPM}`;
       let groupToAdd = {
         ...newGroup,
+        startDateTime,
+        endDateTime,
         maxNumber: Number(newGroup.maxNumber),
         participants: 0 // Always include participants field
       };
       const docRef = await addDoc(groupRef, groupToAdd);
       setStudyGroups(prev => [...prev, { ...groupToAdd, id: docRef.id }]);
       setShowModal(false);
-      setNewGroup({ name: '', organizer: '', class: '', maxNumber: '', location: '', startTime: '', endTime: '' });
+      setNewGroup({
+        name: '',
+        organizer: '',
+        class: '',
+        maxNumber: '',
+        location: '',
+        startDate: '',
+        startHour: '1',
+        startMinute: '00',
+        startAMPM: 'AM',
+        endDate: '',
+        endHour: '1',
+        endMinute: '00',
+        endAMPM: 'AM'
+      });
     }
   };
 
@@ -157,6 +193,9 @@ function App() {
           classFilter={classFilter}
           setClassFilter={setClassFilter}
           uniqueClasses={uniqueClasses}
+          locationFilter={locationFilter}
+          setLocationFilter={setLocationFilter}
+          uniqueLocations={uniqueLocations}
           onAddGroupClick={() => setShowModal(true)}
         />
         <ResultsCount count={filteredGroups.length} />

@@ -41,10 +41,16 @@ export const StudyGroupCard = ({ group, index, handleJoinGroup, handleLeaveGroup
             <MapPin className="w-4 h-4 mr-3 text-red-400" />
             <span className="text-sm">{group.location}</span>
           </div>
-          {group.startTime && group.endTime && (
+          {group.startDateTime && (
             <div className="flex items-center text-gray-300">
               <Clock className="w-4 h-4 mr-2 text-yellow-400" />
-              <span className="text-sm">Time: {formatTime12hr(group.startTime)} - {formatTime12hr(group.endTime)}</span>
+              <span className="text-sm">Start: {group.startDateTime}</span>
+            </div>
+          )}
+          {group.endDateTime && (
+            <div className="flex items-center text-gray-300">
+              <Clock className="w-4 h-4 mr-2 text-yellow-400" />
+              <span className="text-sm">End: {group.endDateTime}</span>
             </div>
           )}
         </div>
@@ -61,11 +67,11 @@ export const StudyGroupCard = ({ group, index, handleJoinGroup, handleLeaveGroup
       )}
       {isJoined && (
         <button
-          className="w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 bg-red-600 hover:bg-red-700 text-white"
-          onClick={() => handleLeaveGroup(index)}
+          className="w-full font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-6 bg-gray-600 text-gray-400 cursor-not-allowed"
+          disabled
         >
           <Users className="w-4 h-4 mr-2" />
-          Leave Group
+          Already Joined
         </button>
       )}
     </div>

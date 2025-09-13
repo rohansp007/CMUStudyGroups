@@ -68,24 +68,50 @@ export const AddGroupModal = ({ show, onClose, onSubmit, newGroup, onInputChange
             <option value="Wean Hall">Wean Hall</option>
             <option value="Porter Hall">Porter Hall</option>
           </select>
-          <input
-            type="time"
-            name="startTime"
-            placeholder="Start Time"
-            value={newGroup.startTime}
-            onChange={onInputChange}
-            className="w-full bg-gray-700 rounded-lg py-2 px-3 text-white focus:outline-none"
-            required
-          />
-          <input
-            type="time"
-            name="endTime"
-            placeholder="End Time"
-            value={newGroup.endTime}
-            onChange={onInputChange}
-            className="w-full bg-gray-700 rounded-lg py-2 px-3 text-white focus:outline-none"
-            required
-          />
+          <label className="block text-gray-400 mb-1">Start Date and Time</label>
+          <div className="flex gap-2 mb-2 items-center">
+            <input
+              type="date"
+              name="startDate"
+              value={newGroup.startDate}
+              onChange={onInputChange}
+              className="bg-gray-700 rounded-lg py-2 px-3 text-white focus:outline-none"
+              required
+            />
+            <select name="startHour" value={newGroup.startHour} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              {[...Array(12)].map((_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
+            </select>
+            <span className="text-white flex items-center justify-center" style={{ minWidth: '16px' }}>:</span>
+            <select name="startMinute" value={newGroup.startMinute} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              {[...Array(60)].map((_, i) => <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>)}
+            </select>
+            <select name="startAMPM" value={newGroup.startAMPM} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+          <label className="block text-gray-400 mb-1">End Date and Time</label>
+          <div className="flex gap-2 mb-2 items-center">
+            <input
+              type="date"
+              name="endDate"
+              value={newGroup.endDate}
+              onChange={onInputChange}
+              className="bg-gray-700 rounded-lg py-2 px-3 text-white focus:outline-none"
+              required
+            />
+            <select name="endHour" value={newGroup.endHour} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              {[...Array(12)].map((_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
+            </select>
+            <span className="text-white flex items-center justify-center" style={{ minWidth: '16px' }}>:</span>
+            <select name="endMinute" value={newGroup.endMinute} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              {[...Array(60)].map((_, i) => <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>)}
+            </select>
+            <select name="endAMPM" value={newGroup.endAMPM} onChange={onInputChange} className="bg-gray-700 rounded-lg py-2 px-2 text-white" required>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 mt-2"
