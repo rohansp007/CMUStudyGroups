@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const AddGroupModal = ({ show, onClose, onSubmit, newGroup, onInputChange }) => {
+export const AddGroupModal = ({ show, onClose, onSubmit, newGroup, onInputChange, organizerName }) => {
   if (!show) return null;
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -26,8 +26,8 @@ export const AddGroupModal = ({ show, onClose, onSubmit, newGroup, onInputChange
             type="text"
             name="organizer"
             placeholder="Organizer Name"
-            value={newGroup.organizer}
-            onChange={onInputChange}
+            value={organizerName || ''}
+            readOnly
             className="w-full bg-gray-700 rounded-lg py-2 px-3 text-white placeholder-gray-400 focus:outline-none"
             required
           />

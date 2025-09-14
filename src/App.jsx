@@ -22,6 +22,7 @@ import { AddGroupModal } from './components/AddGroupModal';
 import { NoGroupsFound } from './components/NoGroupsFound';
 import {addDoc, collection, onSnapshot, getDoc} from "firebase/firestore"
 import {db} from "./firebase-config"
+import { query, where, getDocs } from "firebase/firestore";
 
 
 const cookies = new Cookies();
@@ -29,6 +30,7 @@ const cookies = new Cookies();
 function App() {
   const [isAuth, setIsAuth] = useState(cookies.get('auth-token'));
   const userEmail = cookies.get('user-email'); // Or get from your auth state
+  const [userData, setUserData] = useState(null);
   // Removed unused room and roomInputRef
 
   // Study groups state
@@ -49,6 +51,19 @@ function App() {
       unsubscribe()
     };
   }, []);
+
+  useEffect(() => {
+  async function fetchUserData() {
+    if (!userEmail) return;
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", userEmail));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      setUserData(snapshot.docs[0].data());
+    }
+  }
+  fetchUserData();
+}, [userEmail]);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -97,29 +112,32 @@ function App() {
   // Add new group
   const handleAddGroup = async (e) => {
     e.preventDefault();
+    // Ensure organizer is set to organizerName from userData
+    const organizerName = userData?.displayName || '';
+    const groupWithOrganizer = { ...newGroup, organizer: organizerName };
     if (
-      newGroup.name &&
-      newGroup.organizer &&
-      newGroup.class &&
-      newGroup.maxNumber &&
-      newGroup.location &&
-      newGroup.startDate &&
-      newGroup.startHour &&
-      newGroup.startMinute &&
-      newGroup.startAMPM &&
-      newGroup.endDate &&
-      newGroup.endHour &&
-      newGroup.endMinute &&
-      newGroup.endAMPM
+      groupWithOrganizer.name &&
+      groupWithOrganizer.organizer &&
+      groupWithOrganizer.class &&
+      groupWithOrganizer.maxNumber &&
+      groupWithOrganizer.location &&
+      groupWithOrganizer.startDate &&
+      groupWithOrganizer.startHour &&
+      groupWithOrganizer.startMinute &&
+      groupWithOrganizer.startAMPM &&
+      groupWithOrganizer.endDate &&
+      groupWithOrganizer.endHour &&
+      groupWithOrganizer.endMinute &&
+      groupWithOrganizer.endAMPM
     ) {
       // Compose start and end datetime strings
-      const startDateTime = `${newGroup.startDate} @ ${newGroup.startHour.padStart(2, '0')}:${newGroup.startMinute} ${newGroup.startAMPM}`;
-      const endDateTime = `${newGroup.endDate} @ ${newGroup.endHour.padStart(2, '0')}:${newGroup.endMinute} ${newGroup.endAMPM}`;
+      const startDateTime = `${groupWithOrganizer.startDate} @ ${groupWithOrganizer.startHour.padStart(2, '0')}:${groupWithOrganizer.startMinute} ${groupWithOrganizer.startAMPM}`;
+      const endDateTime = `${groupWithOrganizer.endDate} @ ${groupWithOrganizer.endHour.padStart(2, '0')}:${groupWithOrganizer.endMinute} ${groupWithOrganizer.endAMPM}`;
       let groupToAdd = {
-        ...newGroup,
+        ...groupWithOrganizer,
         startDateTime,
         endDateTime,
-        maxNumber: Number(newGroup.maxNumber),
+        maxNumber: Number(groupWithOrganizer.maxNumber),
         participants: 0, // Always include participants field
         followingUsers: [] // Add followingUsers field
       };
@@ -241,6 +259,7 @@ function App() {
         onClose={() => setShowModal(false)}
         onSubmit={handleAddGroup}
         newGroup={newGroup}
+        organizerName={userData?.displayName}
         onInputChange={handleInputChange}
       />
       <div className="w-full px-6 py-6 flex-grow">
